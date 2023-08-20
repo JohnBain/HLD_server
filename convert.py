@@ -1,5 +1,5 @@
 import os
-from flask import Flask, flash, request, redirect, url_for, send_file
+from flask import Flask, flash, request, redirect, url_for, send_file, render_template
 from werkzeug.utils import secure_filename
 
 UPLOAD_FOLDER = 'PYTHON_UPLOADS'
@@ -14,15 +14,7 @@ def allowed_file(filename):
 
 @app.route('/', methods=['GET'])
 def index():
-    return '''
-    <!doctype html>
-    <title>Upload new File</title>
-    <h1>Upload new File</h1>
-    <form action="{{url_for('upload_file')}}" method="POST" enctype="multipart/form-data">
-      <input type=file name=file>
-      <input type=submit value=Upload id="myinput">
-    </form>
-    '''
+    return render_template("index.html")
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
@@ -48,8 +40,8 @@ def upload_file():
 
 @app.route('/download', methods=['GET'])
 def download_file():
-    print(f"diagnostic info. {UPLOAD_FOLDER}/{request.args.get('filename')}")
-    return send_file(f"{UPLOAD_FOLDER}/{request.args.get('filename')}",as_attachment=True)
+    print(f"diagnostic info. {request.args.get('filename')}")
+    return send_file(f"{UPLOAD_FOLDER}/{request.args.get('filename')}", as_attachment=True)
     #return "Hello world"
 
 app.run('0.0.0.0', 97, use_reloader=True)
