@@ -1,0 +1,23 @@
+<!doctype html>
+    <title>Upload new File</title>
+    <h1>Upload new File</h1>
+    <form method=post enctype=multipart/form-data>
+      <input type=file name=file>
+      <input type=submit value=Upload id="myinput">
+    </form>
+
+    <script>
+    function ready(fn) {
+        if (document.readyState !== 'loading') {
+            fn();
+            return;
+        }
+        document.addEventListener('DOMContentLoaded', fn);
+    }
+    ready(function(){
+        console.log("Hello world!")
+        var button = document.getElementById("myinput");
+        console.log(button);
+        //window.location.replace('http://localhost:97/download?filename=1200x0.jpg')
+    })
+    </script>
