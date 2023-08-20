@@ -18,7 +18,7 @@ def index():
     <!doctype html>
     <title>Upload new File</title>
     <h1>Upload new File</h1>
-    <form action="http://localhost:97/upload" method="POST" enctype="multipart/form-data">
+    <form action="{{url_for('upload_file')}}" method="POST" enctype="multipart/form-data">
       <input type=file name=file>
       <input type=submit value=Upload id="myinput">
     </form>
