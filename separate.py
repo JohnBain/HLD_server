@@ -1,6 +1,6 @@
 from PIL import Image
 
-TEST = True
+TEST = False
 SEPARATE_INTO = 3
 
 if TEST:
