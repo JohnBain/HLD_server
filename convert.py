@@ -1,5 +1,6 @@
 import os
 import io
+import sys
 from flask import Flask, flash, request, redirect, url_for, send_file, render_template
 from werkzeug.utils import secure_filename
 from werkzeug.datastructures import FileStorage
@@ -8,7 +9,6 @@ from PIL import Image
 from separate import most_interesting_third
 from flask_cors import CORS
 import base64
-
 
 UPLOAD_FOLDER = 'PYTHON_UPLOADS'
 TRANSFORM_FOLDER = "TRANSFORMS"
@@ -132,4 +132,6 @@ def speak():
 
 
 
-app.run('0.0.0.0', 97, use_reloader=True)
+app.run('0.0.0.0', 98, use_reloader=True)
+
+
