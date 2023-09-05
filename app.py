@@ -46,6 +46,7 @@ def add_item():
 def hello_world():
     return "<h1>Hello world!</h1>"
 
+#curl http://3.88.151.187:5000/list_items
 @app.route('/list_items', methods=['GET']) #direct POST request
 @dbconnection
 def list_items(**kwargs):
@@ -66,8 +67,9 @@ def list_items(**kwargs):
 	return finaljson
 
 @app.route('/list_user_items', methods=['POST']) #direct POST request
-def lui():
-	(cursor, cnx) = open_connection()
+@dbconnection
+def lui(**kwargs):
+	(cursor, cnx) = (kwargs['cursor'], kwargs['cnx'])
 	query = "SELECT * from Items WHERE UserId = 1"
 	cursor.execute(query)
 	row = cursor.fetchone()
@@ -77,27 +79,27 @@ def lui():
 		finaljson.append(itm)
 		row = cursor.fetchone()
 
-	close_connection(cnx)
 	return finaljson
 
 #curl -X POST -H "Content-Type: application/json" -d '{"productId": 123456, "quantity": 100}' http://3.88.151.187:5000/add_user_item
 
+#curl -d '{"userId":"1", "imagePath":"p.jpg"}' -H "Content-Type: application/json" -X POST http://3.88.151.187:5000/add_user_item
 @app.route('/add_user_item', methods=['POST'])
-def aui():
-    myjson = request.get_json(force=True) #forgot to set MIME type... remove in production
-    for i in myjson:
-    	print(myjson)
-    (cursor, cnx) = open_connection()
-    query = "INSERT INTO Items (UserID,imageUrl) VALUES (1, 'https://i.pinimg.com/736x/44/29/f0/4429f02128255f000ff0f11e03fc2cb2.jpg');"
+@dbconnection
+def aui(**kwargs):
+    (cursor, cnx) = (kwargs['cursor'], kwargs['cnx'])
+    if not all(key in request.json for key in ('userId', 'imagePath')):
+        return "Failed!"
+    (userId,imagePath) = (int(request.json['userId']), request.json['imagePath'])
+    query = f"INSERT INTO Items (UserID,imageUrl,createdOn,updatedOn) VALUES ({userId}, '{imagePath}', CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP());"
     cursor.execute(query)
-    cnx.commit()
-    return "Done!"
+    return f"Successfuly created new imageUrl {imagePath} on user {userId}!"
 
 @app.route('/create_new_user', methods=['POST'])
 def cnu():
     myjson = request.get_json(force=True) 
     for i in myjson:
-    	print(myjson)
+        print(myjson)
     (cursor, cnx) = open_connection()
     query = "INSERT INTO Items (UserID,imageUrl) VALUES (1, 'https://i.pinimg.com/736x/44/29/f0/4429f02128255f000ff0f11e03fc2cb2.jpg');"
     cursor.execute(query)
