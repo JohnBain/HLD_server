@@ -142,13 +142,50 @@ def cnu(**kwargs):
 
 	query = f"INSERT INTO Users (username,pword) VALUES ('{username}', '{pword}');"
 	result = cursor.execute(query)
+
+	#maybe we should check to see if it was actually created
+
+	#this can all be removed
 	row = cursor.fetchone()
 	finaljson = []
 	while row is not None:
 		itm = dict(zip(cursor.column_names, row))
 
-	cnx.commit()
-	return f"User {username} added!", 200	
+	print(itm)
+
+	return f"User {username} added!", 200
+
+#curl -d '{"username": "jimbob", "pword": "jimothy"}' -H "Content-Type: application/json" -X POST http://3.88.151.187:5000/login
+@app.route('/login', methods=['POST'])	
+@dbconnection
+def login(**kwargs):
+	try:
+		(cursor, cnx) = (kwargs['cursor'], kwargs['cnx'])
+		myjson = request.get_json(force=True) 
+		print(request.json)
+		if not all(key in request.json for key in ('username', 'pword')):
+			return "Bad JSON", 400
+
+		username = request.json['username']
+		pword = request.json['pword']
+		print(username)
+		print(pword)
+		query = f"SELECT username, pword FROM Users WHERE username='jimbob';"
+		
+		result = cursor.execute(query)
+		row = cursor.fetchone()
+		
+		itm = dict(zip(cursor.column_names, row))
+
+		if pword == itm['pword']:
+			print("Pword match!")
+			return 'Pword match', 200
+		if pword != itm['pword']:
+			return "Pword did not match", 500
+		else:
+			return 'Something went wrong', 500
+	except Exception:
+		return "Something went wrong", 500
 
 if __name__ == "__main__":
 	app.run('0.0.0.0', 5000, use_reloader=True)
