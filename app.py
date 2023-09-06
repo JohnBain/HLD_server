@@ -117,13 +117,30 @@ def aui(**kwargs):
     cursor.execute(query)
     return f"Successfuly created new imageUrl {imagePath} on user {userId}!", 200
 
-#curl -d '{"userId":"1", "imagePath":"p.jpg"}' -H "Content-Type: application/json" -X POST http://3.88.151.187:5000/add_user_item
+#curl -d '{"username": "jimbob", "pword": "jimothy"}' -H "Content-Type: application/json" -X POST http://3.88.151.187:5000/create_new_user
 @app.route('/create_new_user', methods=['POST'])
-def cnu():
+@dbconnection
+def cnu(**kwargs):
 	(cursor, cnx) = (kwargs['cursor'], kwargs['cnx'])
 	myjson = request.get_json(force=True) 
+	print(request.json)
+	if not all(key in request.json for key in ('username', 'pword')):
+		return "Bad JSON", 400
+	username = request.json['username']
+	pword = request.json['pword']
 
-	query = "INSERT INTO Users (UserID,imageUrl) VALUES (1, 'https://i.pinimg.com/736x/44/29/f0/4429f02128255f000ff0f11e03fc2cb2.jpg');"
+	query = f"SELECT * from Users where username='{username}'"
+
+	result = cursor.execute(query)
+	row = cursor.fetchone()
+	finaljson = []
+	if row is None:
+		#proceed
+		print('it worked')
+	else:
+		return f"User {username} already exists", 500
+
+	query = f"INSERT INTO Users (username,pword) VALUES ('{username}', '{pword}');"
 	result = cursor.execute(query)
 	row = cursor.fetchone()
 	finaljson = []
@@ -131,11 +148,10 @@ def cnu():
 		itm = dict(zip(cursor.column_names, row))
 
 	cnx.commit()
-	return "Done!", 200	
+	return f"User {username} added!", 200	
 
 if __name__ == "__main__":
 	app.run('0.0.0.0', 5000, use_reloader=True)
-
 
 
 
