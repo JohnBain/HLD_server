@@ -64,13 +64,37 @@ def list_items(**kwargs):
 
 	# close_connection(cnx)
 	
-	return finaljson
+	return finaljson, 200
 
-@app.route('/list_user_items', methods=['POST']) #direct POST request
+@app.route('/list_users', methods=['GET']) #direct POST request
 @dbconnection
-def lui(**kwargs):
+def list_users(**kwargs):
+	print('in list users')
+	cursor = kwargs['cursor']
+	cnx = kwargs['cnx']
+	query = "SELECT * from Users"
+	result = cursor.execute(query)
+	row = cursor.fetchone()
+	finaljson = []
+	while row is not None:
+		itm = dict(zip(cursor.column_names, row))
+		finaljson.append(itm)
+		row = cursor.fetchone()
+
+	# close_connection(cnx)
+	
+	return finaljson, 200
+
+#curl -d '{"userId":"1"}' -H "Content-Type: application/json" -X POST http://3.88.151.187:5000/list_items_by_user
+@app.route('/list_items_by_user', methods=['POST']) #direct POST request
+@dbconnection
+def libu(**kwargs):
+	print(request.json)
+	if not "userId" in request.json:
+		return "Bad Request - JSON does not contain userId", 400
+	userId = request.json['userId']
 	(cursor, cnx) = (kwargs['cursor'], kwargs['cnx'])
-	query = "SELECT * from Items WHERE UserId = 1"
+	query = f"SELECT * from Items WHERE UserId = {int(userId)}"
 	cursor.execute(query)
 	row = cursor.fetchone()
 	finaljson = []
@@ -79,9 +103,7 @@ def lui(**kwargs):
 		finaljson.append(itm)
 		row = cursor.fetchone()
 
-	return finaljson
-
-#curl -X POST -H "Content-Type: application/json" -d '{"productId": 123456, "quantity": 100}' http://3.88.151.187:5000/add_user_item
+	return finaljson, 200
 
 #curl -d '{"userId":"1", "imagePath":"p.jpg"}' -H "Content-Type: application/json" -X POST http://3.88.151.187:5000/add_user_item
 @app.route('/add_user_item', methods=['POST'])
@@ -93,18 +115,23 @@ def aui(**kwargs):
     (userId,imagePath) = (int(request.json['userId']), request.json['imagePath'])
     query = f"INSERT INTO Items (UserID,imageUrl,createdOn,updatedOn) VALUES ({userId}, '{imagePath}', CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP());"
     cursor.execute(query)
-    return f"Successfuly created new imageUrl {imagePath} on user {userId}!"
+    return f"Successfuly created new imageUrl {imagePath} on user {userId}!", 200
 
+#curl -d '{"userId":"1", "imagePath":"p.jpg"}' -H "Content-Type: application/json" -X POST http://3.88.151.187:5000/add_user_item
 @app.route('/create_new_user', methods=['POST'])
 def cnu():
-    myjson = request.get_json(force=True) 
-    for i in myjson:
-        print(myjson)
-    (cursor, cnx) = open_connection()
-    query = "INSERT INTO Items (UserID,imageUrl) VALUES (1, 'https://i.pinimg.com/736x/44/29/f0/4429f02128255f000ff0f11e03fc2cb2.jpg');"
-    cursor.execute(query)
-    cnx.commit()
-    return "Done!"
+	(cursor, cnx) = (kwargs['cursor'], kwargs['cnx'])
+	myjson = request.get_json(force=True) 
+
+	query = "INSERT INTO Users (UserID,imageUrl) VALUES (1, 'https://i.pinimg.com/736x/44/29/f0/4429f02128255f000ff0f11e03fc2cb2.jpg');"
+	result = cursor.execute(query)
+	row = cursor.fetchone()
+	finaljson = []
+	while row is not None:
+		itm = dict(zip(cursor.column_names, row))
+
+	cnx.commit()
+	return "Done!", 200	
 
 if __name__ == "__main__":
 	app.run('0.0.0.0', 5000, use_reloader=True)
