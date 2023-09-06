@@ -170,7 +170,7 @@ def login(**kwargs):
 		pword = request.json['pword']
 		print(username)
 		print(pword)
-		query = f"SELECT username, pword FROM Users WHERE username='jimbob';"
+		query = f"SELECT username, pword FROM Users WHERE username='{username}';"
 		
 		result = cursor.execute(query)
 		row = cursor.fetchone()
